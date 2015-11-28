@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd /
+
 # usvnの設定ディレクトリがなければ作成する
 if [ ! -e "/var/lib/svn/config" ]; then
 	mkdir /var/lib/svn/config
@@ -12,6 +14,20 @@ if [ ! -e "/var/lib/svn/files" ]; then
 	chown www-data:www-data /var/lib/svn/files
 fi
 ln -s /var/lib/svn/files /usr/local/src/usvn-1.0.7/files
+
+if [ "x${USVN_SUBDIR}" = "x" ]; then
+	ln -s /usr/local/src/usvn-1.0.7/public /var/www/html
+else
+	# 荒っぽいが、これでディレクトリが準備できる
+	mkdir -p /var/www/html${USVN_SUBDIR}
+	chown www-data:www-data /var/www/html${USVN_SUBDIR}
+	cd /var/www/html${USVN_SUBDIR}
+	cd ../
+	rmdir ./*
+	ln -s /usr/local/src/usvn-1.0.7/public /var/www/html${USVN_SUBDIR}
+fi
+
+cd /
 
 # apacheの設定を変更
 cat << EOF > /etc/apache2/sites-available/000-default.conf
@@ -31,7 +47,7 @@ cat << EOF > /etc/apache2/sites-available/000-default.conf
 EOF
 
 cat << EOF > /etc/apache2/mods-enabled/dav_svn.conf
-<Location /svn/>
+<Location ${USVN_SUBDIR}/svn/>
 	ErrorDocument 404 default
 	DAV svn
 	Require valid-user

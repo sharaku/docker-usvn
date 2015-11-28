@@ -14,8 +14,7 @@ RUN \
         wget "https://github.com/usvn/usvn/archive/1.0.7.tar.gz" -O usvn-1.0.7.tar.gz && \
         tar zxvf usvn-1.0.7.tar.gz && \
         chown -R www-data:www-data /usr/local/src/usvn-1.0.7 && \
-	rm -rf /var/www/html && \
-        ln -s /usr/local/src/usvn-1.0.7/public /var/www/html
+	rm -rf /var/www/html
 
 RUN \
         mkdir /var/lib/svn; \
@@ -28,8 +27,22 @@ ADD start.sh /opt/start.sh
 RUN \
   chmod -R 555 /opt/start.sh
 
+# ######################################################################
+# Clear out the local repository of retrieved package files
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# ######################################################################
+# Default configuration: can be overridden at the docker command line
+
+# USVN_SUBDIR /usvn -> http://IP/usvn/
+ENV USVN_SUBDIR ""
+
+# ######################################################################
 # Expose port 80 must
 EXPOSE 80
+
+# ######################################################################
+# data volume
 VOLUME /var/lib/svn
 
 # start
