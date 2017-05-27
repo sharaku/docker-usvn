@@ -16,6 +16,7 @@ fi
 ln -s /var/lib/svn/files /usr/local/src/usvn-1.0.7/files
 
 if [ "x${USVN_SUBDIR}" = "x" ]; then
+    rm -rf /var/www/html
 	ln -s /usr/local/src/usvn-1.0.7/public /var/www/html
 else
 	# 荒っぽいが、これでディレクトリが準備できる
